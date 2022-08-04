@@ -1,18 +1,10 @@
 const { ApolloServer } = require("apollo-server");
+const { PrismaClient } = require("@prisma/client");
 
 const fs = require("fs");
 const path = require("path");
 
-const users = [
-  {
-    id: 1,
-    name: "Brain",
-  },
-  {
-    id: 2,
-    name: "Pinky",
-  },
-];
+const prisma = new PrismaClient();
 
 const typeDefs = fs.readFileSync(
   path.join(__dirname, "schema.graphql"),
@@ -22,18 +14,19 @@ const typeDefs = fs.readFileSync(
 const resolvers = {
   Query: {
     info: () => "Hello, GraphQL!",
-    users: () => users,
+    users: async (_parent, _args, { prisma }) => {
+      return prisma.user.findMany();
+    },
   },
   Mutation: {
-    createUser: (parent, args) => {
-      const id = users.length + 1;
-
-      const user = {
-        id,
-        name: args.name,
-      };
-
-      users.push(user);
+    createUser: (_parent, args, { prisma }) => {
+      const { name, email } = args;
+      const user = prisma.user.create({
+        data: {
+          name,
+          email,
+        },
+      });
       return user;
     },
   },
@@ -42,6 +35,9 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: {
+    prisma,
+  },
 });
 
 server.listen().then(({ url }) => {

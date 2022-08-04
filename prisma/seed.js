@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
@@ -34,7 +34,9 @@ async function main() {
       },
     },
   });
-  console.log({ pinky, brain });
+
+  const users = await prisma.user.findMany();
+  console.log(users);
 }
 
 main()
