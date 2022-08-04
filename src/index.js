@@ -11,25 +11,16 @@ const typeDefs = fs.readFileSync(
   "utf8"
 );
 
+const Query = require("./resolvers/Query");
+const Mutation = require("./resolvers/Mutation");
+const Post = require("./resolvers/Post");
+const User = require("./resolvers/User");
+
 const resolvers = {
-  Query: {
-    info: () => "Hello, GraphQL!",
-    users: async (_parent, _args, { prisma }) => {
-      return prisma.user.findMany();
-    },
-  },
-  Mutation: {
-    createUser: (_parent, args, { prisma }) => {
-      const { name, email } = args;
-      const user = prisma.user.create({
-        data: {
-          name,
-          email,
-        },
-      });
-      return user;
-    },
-  },
+  Query,
+  Mutation,
+  Post,
+  User,
 };
 
 const server = new ApolloServer({
