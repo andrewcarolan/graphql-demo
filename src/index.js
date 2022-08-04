@@ -1,22 +1,49 @@
-import { PrismaClient } from "@prisma/client";
+const { ApolloServer } = require("apollo-server");
 
-const prisma = new PrismaClient();
+const fs = require("fs");
+const path = require("path");
 
-async function main() {
-  const users = await prisma.user.findMany({
-    include: {
-      posts: true,
+const users = [
+  {
+    id: 1,
+    name: "Brain",
+  },
+  {
+    id: 2,
+    name: "Pinky",
+  },
+];
+
+const typeDefs = fs.readFileSync(
+  path.join(__dirname, "schema.graphql"),
+  "utf8"
+);
+
+const resolvers = {
+  Query: {
+    info: () => "Hello, GraphQL!",
+    users: () => users,
+  },
+  Mutation: {
+    createUser: (parent, args) => {
+      const id = users.length + 1;
+
+      const user = {
+        id,
+        name: args.name,
+      };
+
+      users.push(user);
+      return user;
     },
-  });
-  console.dir(users, { depth: null });
-}
+  },
+};
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
+
+server.listen().then(({ url }) => {
+  console.log(`Server listening on ${url}`);
+});
