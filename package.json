@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "setup": "prisma generate && prisma migrate dev",
     "start": "nodemon ./src/index.js"
   },
   "prisma": {
